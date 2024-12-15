@@ -99,6 +99,50 @@ if __name__ == "__main__":
     
     # Data Preprocessing
     data = data_preprocessing(data)
+    print(data)
+    legnth = []
+    for string in data["Review"]:
+        legnth.append(len(string))
+    print(max(legnth))
+    data = data[data["Rating"] != 3]
+    X = data["Review"].to_numpy()
+    y = data["Rating"]
+    data["Rating"] = data["Rating"].map({1: 0, 2: 1})
+    y = data["Rating"].to_numpy()
+    # print(y.value_counts())
+
+    x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
+    tokenizer = Tokenizer(num_words=5000, oov_token="<OOV>")
+    tokenizer.fit_on_texts(x_train)
+
+    x_train = tokenizer.texts_to_sequences(x_train)
+    x_test = tokenizer.texts_to_sequences(x_test)
+
+    x_train = pad_sequences(x_train, maxlen=200, padding='post', truncating='post')
+    x_test = pad_sequences(x_test, maxlen=200, padding='post', truncating='post')
+
+    model = Sequential([
+        Embedding(input_dim=5000, output_dim=32, input_length=200),
+        LSTM(128, return_sequences=True),
+        Dropout(0.3),
+        LSTM(64),
+        Dropout(0.3),
+        Dense(32, activation="relu"),
+        Dense(1, activation='sigmoid')
+    ])
+
+    model.compile(optimizer='adam', loss="binary_crossentropy", metrics=['accuracy'])
+
+    history = model.fit(
+        x_train, y_train,
+        validation_split=0.2,
+        epochs=20,
+        batch_size=16,
+        verbose=2
+    )
+
+    test_loss, test_accuracy = model.evaluate(x_test, y_test, verbose=10)
+    print(test_accuracy)
     
     
 
