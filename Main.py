@@ -40,6 +40,8 @@ def remove_tags(text):
 def remove_special_char(text):
     return re.sub(r'[^a-zA-Z0-9\s]', ' ', text)
 
+
+# stemming tokens
 def stem_tokens(tokens):
     stemmer = PorterStemmer()
     return [stemmer.stem(token) for token in tokens]
